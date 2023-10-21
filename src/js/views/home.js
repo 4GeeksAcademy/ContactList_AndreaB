@@ -1,21 +1,45 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import rigoImage from "../../img/rigo-baby.jpg";
 import "../../styles/home.css";
 import { ContactCard } from "../component/contactcard";
 import { useNavigate } from "react-router-dom";
 import { any } from "prop-types";
+import { Context } from "../store/appContext";
 
 export const Home = () => {
+  const { store, actions } = useContext(Context);
+  const [list, setList] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+
   let navigate = useNavigate();
+
+  const toggleModal = () => {
+    setOpenModal(!openModal);
+  };
+
+  useEffect(() => {
+    let mount = true;
+    console.log(JSON.stringify(store));
+    console.log("useEffect");
+    actions
+      .getAllContacts()
+      .then((data) => {
+        console.log(JSON.stringify(store));
+        return store.contactList;
+      })
+      .then((data) => {
+        setList(data);
+      });
+  }, [openModal]);
 
   return (
     <div className="container">
       <div className="row">
-        <div className="">
+        <div className="mb-2">
           <div>
             <button
               type="button"
-              className="btn btn-outline-success btn-sm float-end"
+              className="btn btn-success btn-sm float-end"
               onClick={() => navigate("/addContact")}
             >
               Add New Contact
@@ -24,14 +48,13 @@ export const Home = () => {
         </div>
         {/* body */}
         <div>
-          <ContactCard
-            contact={{
-              name: "Antoine",
-              phoneNumber: "3052539684",
-              location: "Miami",
-              email: "an.gordonalvarez@gmail.com",
-            }}
-          ></ContactCard>
+          {list.map((item, index) => (
+            <ContactCard
+              contact={item}
+              key={item.id}
+              toggleMethod={toggleModal}
+            ></ContactCard>
+          ))}
         </div>
       </div>
       <div
